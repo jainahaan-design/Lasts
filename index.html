@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lasts — pocket money tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3F0FF;--card:#FFFFFF;--ink:#231942;--mute:#6B6485;--line:#E1DBF5;--accent:#5B3FD9;--ok:#1E9E6A;--bad:#E5484D;--track:#E7E1FA;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17122B;--card:#231C3F;--ink:#F1EEFF;--mute:#A9A0C8;--line:#352D5A;--accent:#9D86FF;--ok:#4CD39A;--bad:#FF7A7F;--track:#2E2650;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17122B;--card:#231C3F;--ink:#F1EEFF;--mute:#A9A0C8;--line:#352D5A;--accent:#9D86FF;--ok:#4CD39A;--bad:#FF7A7F;--track:#2E2650;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 "DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+main{max-width:480px;margin:0 auto;padding:20px 18px 110px}
+h1,h2,.big{font-family:"Bricolage Grotesque","DM Sans",system-ui,sans-serif;margin:0}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.logo{font:800 22px "Bricolage Grotesque",sans-serif}
+button,input,select{font:inherit;color:inherit}
+.link{background:none;border:0;color:var(--mute);padding:8px 0;cursor:pointer;text-decoration:underline}
+.hero{background:var(--accent);color:#fff;border-radius:22px;padding:22px 20px}
+:root:not([data-theme="light"]) .hero{--h:1}
+.hero small{opacity:.85;font-size:14px}
+.big{font-size:56px;font-weight:800;line-height:1.05;letter-spacing:-.02em;margin:4px 0 2px}
+.big.neg{color:#FFD1D3}
+.hero p{margin:6px 0 0;opacity:.92;font-size:15px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
+h2{font-size:17px;font-weight:700;margin-bottom:10px}
+.row{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:var(--mute);margin:10px 0 5px}
+.row b{color:var(--ink);font-weight:500}
+.track{height:12px;background:var(--track);border-radius:99px;position:relative;overflow:hidden}
+.fill{height:100%;border-radius:99px;transition:width .4s}
+.fill.time{background:var(--mute);opacity:.55}
+.fill.money{background:var(--ok)}
+.fill.money.hot{background:var(--bad)}
+.pace{margin:12px 0 0;font-weight:500}
+.pace.ok{color:var(--ok)}.pace.bad{color:var(--bad)}
+label{display:block;font-size:14px;color:var(--mute);margin:12px 0 5px}
+input[type=number],input[type=text],select{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);outline:none}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.amt{font-size:22px;font-weight:700}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.chip{border:1.5px solid var(--line);background:var(--bg);padding:8px 13px;border-radius:99px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn{width:100%;margin-top:16px;padding:14px;border:0;border-radius:14px;background:var(--ink);color:var(--bg);font-weight:700;font-size:16px;cursor:pointer}
+.btn:active{transform:scale(.98)}
+.item{display:flex;align-items:center;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item .t{flex:1;min-width:0}
+.item .t div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .t span{font-size:13px;color:var(--mute)}
+.item .a{font-weight:700}
+.x{background:none;border:0;color:var(--mute);font-size:20px;padding:4px 8px;cursor:pointer}
+.cat{display:grid;grid-template-columns:78px 1fr auto;gap:10px;align-items:center;font-size:14px;margin:8px 0}
+.cat .track{height:8px}.cat .fill{background:var(--accent)}
+.grp{margin-top:12px}
+.empty{color:var(--mute);padding:6px 0}
+.three{display:grid;grid-template-columns:1fr 80px;gap:10px}
+.setup{margin-top:30px}
+.setup h1{font-size:34px;line-height:1.1;font-weight:800;letter-spacing:-.02em}
+.setup p{color:var(--mute);margin:10px 0 0}
+.two{display:grid;grid-template-columns:90px 1fr;gap:10px}
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .25s}
+.toast.on{opacity:1}
+.tick{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--line);background:var(--bg);color:var(--ok);font-weight:800;cursor:pointer;padding:0;flex:none}
+.tick[aria-pressed=true]{border-color:var(--ok)}
+.two2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn.alt{background:none;color:var(--ink);border:1.5px solid var(--line)}
+body,.card{transition:background .6s,color .6s,border-color .6s}
+html:root[data-mood="danger"]{--bg:#1A0A0D;--card:#2B1116;--ink:#FFE9EA;--mute:#D9A0A6;--line:#4D1E26;--accent:#D6303A;--ok:#FF9E80;--bad:#FF6B70;--track:#3D171D;color-scheme:dark}
+#nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom,0px));z-index:10}
+#nav button{flex:1;background:none;border:0;padding:6px 2px;font-size:11px;color:var(--mute);cursor:pointer;position:relative}
+#nav button[aria-current=true]{color:var(--ink);font-weight:700}
+#nav .ic{display:block;font-size:20px}
+#nav .bd{position:absolute;top:0;right:10px;font-size:11px}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:20;overflow:hidden}
+#fx span{position:absolute;bottom:-40px;font-size:26px;opacity:.6;animation:rise linear infinite}
+@keyframes rise{to{transform:translateY(-115vh) rotate(25deg)}}
+.dots{display:flex;gap:8px;margin-top:12px}.dot{flex:1;text-align:center;font-size:22px}.dot small{display:block;font-size:12px;color:var(--mute)}
+.mood{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 14px;margin-bottom:14px;font-weight:500}
+svg text{fill:var(--mute);font-size:9px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav id="nav" hidden></nav>
+<div id="fx" aria-hidden="true"></div>
+<div class="toast" id="toast" role="status"></div>
+<div id="outw" hidden style="max-width:480px;margin:0 auto;padding:0 18px 60px"><textarea id="out" readonly aria-label="Text to copy" style="width:100%;height:130px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);padding:10px"></textarea></div>
+<script>
+let CATS=["Food","Travel","Fun","Shopping","Other"];
+const KEY="lasts-v1";
+let S=load();S.plans=S.plans||[];S.savings=S.savings||{total:0,log:[]};S.best=S.best||0;S.startDay=S.startDay||1;S.recaps=S.recaps||[];S.cb=S.cb||0;S.goal=S.goal||null;S.cats=S.cats||CATS.slice();CATS=S.cats;S.ptypes=S.ptypes||['Outings','Subscriptions','Petrol','Misc'];
+let pick="Food",ptype="Outings",TAB="home",PREV="auto",CTX={},FXM="",PREC=false;
+const PRESETS={Outings:["Party","Dinner","Lunch","Concert","Movie","Trip"],Subscriptions:["iCloud","Apple Music","YouTube","Netflix","Spotify","Prime"],Petrol:["Petrol"],Misc:["Misc"]};
+
+function load(){
+  try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}
+  return {budget:0,cur:"₹",month:mk(),expenses:[],plans:[]};
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function mk(d=new Date()){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
+function dk(d=new Date()){return mk(d)+"-"+String(d.getDate()).padStart(2,"0")}
+function fmt(n){return S.cur+Math.round(n).toLocaleString()}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("on");setTimeout(()=>t.classList.remove("on"),1800)}
+
+function render(){
+  const c=cyc();rollover(c);autoPay(c);
+  const app=document.getElementById("app");
+  if(!S.budget){app.innerHTML=setupView();document.getElementById('nav').hidden=true;applyMood('happy');return}
+  const dim=c.dim,day=c.day;
+  const daysLeft=dim-day+1,today=dk();
+  const spent=S.expenses.reduce((a,e)=>a+e.amt,0);
+  const spentToday=S.expenses.filter(e=>e.date===today).reduce((a,e)=>a+e.amt,0);
+  const before=spent-spentToday;
+  const planned=S.plans.reduce((a,p)=>a+p.amt,0),flex=S.budget-planned;
+  const allowance=(flex-before)/daysLeft;
+  const dayAmt={};S.expenses.forEach(e=>dayAmt[e.date]=(dayAmt[e.date]||0)+e.amt);
+  let streak=0;for(let i=day;i>=1;i--){const d=dk(new Date(c.s.getFullYear(),c.s.getMonth(),c.s.getDate()+i-1));if((dayAmt[d]||0)>flex/dim)break;streak++}
+  if(flex<=0)streak=0;if(streak>S.best){S.best=streak;save()}if(streak>S.cb){S.cb=streak;save()}
+  const leftToday=allowance-spentToday;
+  const timePct=day/dim*100,moneyPct=Math.min(100,flex>0?spent/flex*100:100);
+  const ahead=moneyPct>timePct+5;let mood=(leftToday<0||moneyPct>=80||flex<=0)?'danger':(leftToday<allowance*0.3||moneyPct>=60||moneyPct>timePct+5)?'mid':'happy';if(PREV!=='auto')mood=PREV;const danger=mood==='danger';applyMood(mood);
+  const byCat={};S.expenses.forEach(e=>byCat[e.cat]=(byCat[e.cat]||0)+e.amt);
+  const maxC=Math.max(1,...Object.values(byCat));
+  const list=[...S.expenses].reverse().slice(0,30);CTX={mood,dayAmt,dim,day,flex,streak,byCat,c};
+  app.innerHTML=`
+  <div class="top"><div class="logo">Lasts</div><button class="link" onclick="editBudget()">Change budget</button></div>
+  <section class="hero" aria-live="polite">
+    <small>Safe to spend today</small>
+    <div class="big ${leftToday<0?"neg":""}">${leftToday<0?"-":""}${fmt(Math.abs(leftToday))}</div>
+    <p>${leftToday<0?"You’re over today’s limit. Tomorrow’s limit will shrink.":"Stay under this and your money lasts all month."}</p>
+    <p>🔥 ${streak}-day streak · best ${S.best}. A streak day means spending under ${fmt(flex/dim)}.</p>
+  </section>
+  <section class="card">
+    <h2>Month so far</h2>
+    <div class="row"><span>Pocket money</span><b>${fmt(S.budget)}</b></div>
+    <div class="row"><span>🔁 Auto-pay taken out</span><b>-${fmt(psum(true))}</b></div>
+    <div class="row"><span>One-time plans</span><b>-${fmt(psum(false))}</b></div>
+    <div class="row"><span><b>In hand to spend</b></span><b style="color:var(--ok)">${fmt(flex)}</b></div>
+    <hr style="border:0;border-top:1px solid var(--line);margin:12px 0 0">
+    <div class="row"><span>Days gone</span><b>${day} of ${dim}</b></div>
+    <div class="track"><div class="fill time" style="width:${timePct}%"></div></div>
+    <div class="row"><span>Everyday spending</span><b>${fmt(spent)} of ${fmt(Math.max(0,flex))}</b></div>
+    <div class="track"><div class="fill money ${ahead?"hot":""}" style="width:${moneyPct}%"></div></div>
+    <p class="pace ${danger||ahead?"bad":"ok"}">${spent>flex?"You’ve used up your everyday money for this month.":moneyPct>=80?"Danger zone: only "+fmt(Math.max(0,flex-spent))+" left for the rest of the month.":ahead?"Spending faster than the month. Slow down.":"On track. Money is lasting as long as the month."}</p>
+  </section>
+  ${planCard()}${savCard()}${goalCard()}${recapCard()}
+  <section class="card">
+    <h2>Add spending</h2>
+    <label for="amt">Amount</label>
+    <input id="amt" class="amt" type="number" inputmode="decimal" min="0" placeholder="0">
+    <label>Category</label>
+    <div class="chips">${CATS.map(c=>`<button class="chip" aria-pressed="${c===pick}" onclick="setCat('${c}')">${c}</button>`).join("")}</div>
+    <label for="note">Note (optional)</label>
+    <input id="note" type="text" maxlength="40" placeholder="Chai, auto, movie…">
+    <button class="btn" onclick="addExp()">Add spending</button>
+  </section>
+  <section class="card">
+    <h2>Where it went</h2>
+    ${S.expenses.length?Object.keys(byCat).map(c=>`<div class="cat"><span>${c}</span><div class="track"><div class="fill" style="width:${byCat[c]/maxC*100}%"></div></div><b>${fmt(byCat[c])}</b></div>`).join(""):`<div class="empty">Nothing yet. Add your first spend above.</div>`}
+  </section>
+  <section class="card">
+    <h2>Recent</h2>
+    ${list.length?list.map(e=>`<div class="item"><div class="t"><div>${esc(e.note||e.cat)}</div><span>${e.cat} · ${e.date.slice(8)}/${e.date.slice(5,7)}</span></div><div class="a">${fmt(e.amt)}</div><button class="x" aria-label="Delete" onclick="del(${e.id})">×</button></div>`).join(""):`<div class="empty">No spending logged this month.</div>`}
+  </section>
+  <button class="link" onclick="exportCSV()">Copy spending as CSV</button><br>
+  <button class="link" style="margin-top:14px" onclick="resetMonth()">Clear this month’s spending</button>`;postRender();
+}
+
+function planCard(){
+  const groups=S.ptypes;
+  const planned=S.plans.reduce((a,p)=>a+p.amt,0),flex=S.budget-planned;
+  return `<section class="card"><h2>Monthly plan</h2>
+  <div class="row"><span>Reserved for plans</span><b>${fmt(planned)}</b></div>
+  <div class="row"><span>Still to pay</span><b>${fmt(S.plans.filter(p=>!p.paid).reduce((a,p)=>a+p.amt,0))}</b></div>
+  <div class="row"><span>Left for everyday spending</span><b style="color:${flex<0?"var(--bad)":"var(--ok)"}">${flex<0?"-":""}${fmt(Math.abs(flex))}</b></div>
+  ${flex<0?`<p class="pace bad">Your plans cost more than your budget. Trim something.</p>`:""}
+  ${S.plans.length?groups.map(g=>{const it=S.plans.filter(p=>p.type===g);if(!it.length)return"";return `<div class="grp"><div class="row"><b>${g}</b><b>${fmt(it.reduce((a,p)=>a+p.amt,0))}</b></div>${it.map(p=>`<div class="item"><button class="tick" aria-pressed="${!!p.paid}" aria-label="Mark paid" onclick="togglePaid(${p.id})">${p.paid?"✓":""}</button><div class="t"><div style="${p.paid?"text-decoration:line-through;opacity:.6":""}">${esc(p.name)}</div><span>${p.rec===false?'One-time':'🔁 Auto-pay · day '+(p.day||S.startDay)}${p.paid?' · paid':''}</span></div><div class="a">${fmt(p.amt)}</div><button class="x" aria-label="Delete" onclick="delPlan(${p.id})">×</button></div>`).join("")}</div>`}).join(""):`<div class="empty">Add what you already know you’ll spend on: parties, subscriptions, petrol.</div>`}
+  <label>Type</label>
+  <div class="chips">${groups.map(g=>`<button class="chip" aria-pressed="${g===ptype}" onclick="setPT('${g}')">${g}</button>`).join("")}</div>
+  <div class="three" style="margin-top:10px"><input id="nt" type="text" maxlength="16" placeholder="New type: Concert, Trip…"><button class="btn alt" style="margin-top:0" onclick="addPT()">Add</button></div>
+  <label>Quick pick</label>
+  <div class="chips">${(PRESETS[ptype]||[]).map(n=>`<button class="chip" onclick="document.getElementById('pn').value='${n}'">${n}</button>`).join("")}</div>
+  <label for="pn">Name (type anything)</label>
+  <input id="pn" type="text" maxlength="30" placeholder="Saturday party">
+  <div class="chips" style="margin-top:10px"><button class="chip" aria-pressed="${PREC}" onclick="togRec()">🔁 Repeats every month (auto-pay)</button></div>
+  ${PREC?`<label for="pd">Auto-pays on day of month</label><input id="pd" type="number" min="1" max="31" value="${S.startDay}">`:''}
+  <div class="three"><div><label for="pa">Cost each time</label><input id="pa" class="amt" type="number" inputmode="decimal" min="0" placeholder="0"></div>
+  <div><label for="pt">Times</label><input id="pt" type="number" inputmode="numeric" min="1" value="1"></div></div>
+  <button class="btn" onclick="addPlan()">Add to plan</button></section>`;
+}
+function cyc(){
+  const n=new Date(),D=S.startDay||1,y=n.getFullYear(),m=n.getMonth();
+  const s=new Date(y,n.getDate()>=D?m:m-1,D),nx=new Date(s.getFullYear(),s.getMonth()+1,D);
+  const t=new Date(y,m,n.getDate());
+  return {s,key:dk(s),dim:Math.round((nx-s)/864e5),day:Math.round((t-s)/864e5)+1};
+}
+function rollover(c){
+  if(S.cycle===c.key)return;
+  if(S.cycle&&S.budget){
+    const fl=S.budget-S.plans.reduce((a,p)=>a+p.amt,0),left=fl-S.expenses.reduce((a,e)=>a+e.amt,0);
+    if(left>0){S.savings.total+=left;S.savings.log.push({d:S.cycle,amt:left,why:"Month leftover"});setTimeout(()=>toast('🎉 '+fmt(left)+' moved to your savings pool'),500)}
+    const byC={};S.expenses.filter(e=>e.cat!=="Savings").forEach(e=>byC[e.cat]=(byC[e.cat]||0)+e.amt);
+    const top=Object.entries(byC).sort((a,b)=>b[1]-a[1])[0];
+    const [yy,mm,dd]=S.cycle.split('-').map(Number),od=Math.max(1,Math.round((c.s-new Date(yy,mm-1,dd))/864e5)),da={};
+    S.expenses.forEach(e=>da[e.date]=(da[e.date]||0)+e.amt);
+    let over=0,ns=0,big=0;for(let i=0;i<od;i++){const a=da[dk(new Date(yy,mm-1,dd+i))]||0;if(a>fl/od)over++;if(!a)ns++;if(a>big)big=a}
+    S.recaps.push({d:S.cycle,budget:S.budget,planned:S.budget-fl,spent:fl-left,saved:Math.max(0,left),streak:S.cb||0,top:top?top[0]:"",topAmt:top?top[1]:0,cats:byC,days:od,over,ns,big,auto:psum(true),one:psum(false),pool:S.savings.total,goal:S.goal?{name:S.goal.name,target:S.goal.target}:null});S.cb=0;
+    S.expenses=[];S.plans=S.plans.filter(p=>p.rec!==false);S.plans.forEach(p=>p.paid=false);
+  }
+  S.cycle=c.key;save();
+}
+function togglePaid(id){const p=S.plans.find(x=>x.id===id);if(p){p.paid=!p.paid;save();render()}}
+function savCard(){
+  const v=S.savings;
+  return `<section class="card"><h2>Savings pool</h2>
+  <div class="big" style="font-size:40px;color:var(--ok)">${fmt(v.total)}</div>
+  <div class="row"><span>All-time savings. Whatever is left at 11:59 pm on the last day of the month moves here automatically.</span></div>
+  <label for="sv">Amount</label><input id="sv" class="amt" type="number" inputmode="decimal" min="0" placeholder="0">
+  <div class="two2"><button class="btn" onclick="saveMoney()">Save from this month</button><button class="btn alt" onclick="takeMoney()">Withdraw</button></div>
+  ${v.log.slice(-5).reverse().map(l=>`<div class="item"><div class="t"><div>${esc(l.why)}</div><span>${l.d}</span></div><div class="a" style="color:${l.amt<0?"var(--bad)":"var(--ok)"}">${l.amt<0?"-":"+"}${fmt(Math.abs(l.amt))}</div></div>`).join("")}</section>`;
+}
+function saveMoney(){
+  const v=parseFloat(document.getElementById("sv").value);
+  if(!(v>0)){toast("Enter an amount above 0");return}
+  S.expenses.push({id:Date.now(),amt:v,cat:"Savings",note:"Moved to savings",date:dk()});
+  S.savings.total+=v;S.savings.log.push({d:dk(),amt:v,why:"Saved from this month"});
+  save();render();toast("Saved");
+}
+function takeMoney(){
+  const v=parseFloat(document.getElementById("sv").value);
+  if(!(v>0)){toast("Enter an amount above 0");return}
+  if(v>S.savings.total){toast("Not enough in savings");return}
+  S.savings.total-=v;S.savings.log.push({d:dk(),amt:-v,why:"Withdrawn"});
+  save();render();toast("Withdrawn");
+}
+async function shareText(t){
+  try{if(navigator.share){await navigator.share({text:t});return}}catch(e){if(e&&e.name==="AbortError")return}
+  try{await navigator.clipboard.writeText(t);toast("Copied");return}catch(e){}
+  const w=document.getElementById("outw"),ta=document.getElementById("out");
+  w.hidden=false;ta.value=t;ta.select();w.scrollIntoView({behavior:"smooth"});toast("Copy the text below");
+}
+function shareRecap(){
+  const r=S.recaps[S.recaps.length-1];if(!r)return;
+  shareText(`My Lasts recap (from ${r.d})\nBudget: ${fmt(r.budget)}\nPlanned: ${fmt(r.planned)}\nSpent: ${fmt(r.spent)}\nSaved: ${fmt(r.saved)}\nBest streak: ${r.streak} days`+(r.top?`\nBiggest category: ${r.top} (${fmt(r.topAmt)})`:""));
+}
+function exportCSV(){
+  const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const rows=["date,category,note,amount"].concat(S.expenses.map(e=>[e.date,e.cat,q(e.note||""),e.amt].join(",")));
+  shareText(rows.join("\n"));
+}
+function recapCard(){
+  const r=S.recaps[S.recaps.length-1];if(!r)return"";
+  return `<section class="card"><h2>Last month’s recap</h2>
+  <div class="row"><span>Cycle from</span><b>${r.d}</b></div>
+  <div class="row"><span>Budget</span><b>${fmt(r.budget)}</b></div>
+  <div class="row"><span>Planned</span><b>${fmt(r.planned)}</b></div>
+  <div class="row"><span>Spent</span><b>${fmt(r.spent)}</b></div>
+  <div class="row"><span>Saved to pool</span><b style="color:var(--ok)">${fmt(r.saved)}</b></div>
+  <div class="row"><span>Best streak</span><b>${r.streak} days</b></div>
+  ${r.top?`<div class="row"><span>Biggest category</span><b>${r.top} (${fmt(r.topAmt)})</b></div>`:""}
+  <button class="btn alt" onclick="shareRecap()">Share recap</button></section>`;
+}
+function goalBlock(){
+  const g=S.goal;
+  if(!g)return `<label for="gn">Saving goal</label><input id="gn" type="text" maxlength="30" placeholder="Headphones"><div class="three"><div><label for="gt">Target</label><input id="gt" type="number" inputmode="decimal" min="1" placeholder="3000"></div><div><label for="gw">Weeks</label><input id="gw" type="number" min="1" value="8"></div></div><button class="btn alt" onclick="setGoal()">Set goal</button>`;
+  const rem=Math.max(0,g.target-S.savings.total),wl=Math.max(1,Math.ceil(g.weeks-(Date.now()-g.set)/6048e5)),pct=Math.min(100,S.savings.total/g.target*100);
+  return `<div class="grp"><div class="row"><b>${esc(g.name)}</b><b>${fmt(Math.min(S.savings.total,g.target))} of ${fmt(g.target)}</b></div><div class="track"><div class="fill money" style="width:${pct}%"></div></div><p class="pace ok">${rem>0?"Set aside "+fmt(rem/wl)+" a week to get there in time.":"Goal reached! 🎉"}</p><button class="link" onclick="clearGoal()">Remove goal</button></div>`;
+}
+function setGoal(){
+  const n=document.getElementById("gn").value.trim(),t=parseFloat(document.getElementById("gt").value),w=parseInt(document.getElementById("gw").value)||0;
+  if(!n||!(t>0)||w<1){toast("Add a name, target and weeks");return}
+  S.goal={name:n,target:t,weeks:w,set:Date.now()};save();render();
+}
+function clearGoal(){S.goal=null;save();render()}
+const MV=['--bg','--card','--ink','--mute','--line','--accent','--ok','--bad','--track'];
+const MOODS={mid:['','','','','','#C46A00','#B8860B','',''],danger:['#1A0A0D','#2B1116','#FFE9EA','#D9A0A6','#4D1E26','#D6303A','#FF9E80','#FF6B70','#3D171D']};
+function applyMood(m){const r=document.documentElement.style,v=MOODS[m];MV.forEach((k,i)=>v&&v[i]?r.setProperty(k,v[i]):r.removeProperty(k));r.colorScheme=m==='danger'?'dark':''}
+function go(t){TAB=t;render();window.scrollTo(0,0)}
+function setPrev(p){PREV=p;render()}
+function dayKey(i){const s=CTX.c.s;return dk(new Date(s.getFullYear(),s.getMonth(),s.getDate()+i-1))}
+function pickDay(i){const a=CTX.dayAmt[dayKey(i)]||0,l=CTX.flex/CTX.dim;document.getElementById('bd').innerHTML=`<span>Day ${i}</span><b>${fmt(a)} ${a>l?'😬 over':'😄 under'} the limit</b>`}
+const COL=['#5B3FD9','#E5484D','#1E9E6A','#D9820B','#2B8AE6','#B14AED','#0E9AA7','#E0589C','#7A8B1F','#8A5A44'];
+function lineSvg(lines,xm,ym){
+  const W=300,H=120,sx=v=>v/xm*W,sy=v=>H-Math.min(v,ym)/ym*H;
+  return `<svg viewBox='0 0 300 ${H}' width='100%' role='img'>`+lines.map(l=>`<polyline fill='none' style='stroke:${l.c}' stroke-width='2.5' ${l.d?"stroke-dasharray='5 4'":''} points='${l.p.map(q=>sx(q[0]).toFixed(1)+','+sy(q[1]).toFixed(1)).join(' ')}'/>`).join('')+'</svg>';
+}
+function barSvg(x,lim){
+  const vals=[];for(let i=1;i<=x.day;i++)vals.push(x.dayAmt[dayKey(i)]||0);
+  const mx=Math.max(lim*1.6,...vals,1),H=120,w=300/x.dim,ly=H-lim/mx*H;
+  return `<svg viewBox='0 0 300 ${H}' width='100%' role='img' aria-label='Daily spending'>`+vals.map((v,i)=>{const h=Math.max(3,v/mx*H);return `<rect x='${(i*w+1).toFixed(1)}' y='${(H-h).toFixed(1)}' width='${(w-2).toFixed(1)}' height='${h.toFixed(1)}' rx='2' style='fill:${v>lim?'var(--bad)':'var(--ok)'};cursor:pointer' onclick='pickDay(${i+1})'/>`}).join('')+`<line x1='0' x2='300' y1='${ly}' y2='${ly}' style='stroke:var(--mute)' stroke-dasharray='4 3'/></svg><div id='bd' class='row'><span>Tap a bar. Dashed line is your daily limit (${fmt(lim)}).</span></div>`;
+}
+function donutSvg(by){
+  const e=Object.entries(by),t=e.reduce((a,[,v])=>a+v,0);
+  if(!t)return `<div class='empty'>Add spending to see the mix.</div>`;
+  let off=0;const C=2*Math.PI*40;
+  const arcs=e.map(([k,v],i)=>{const l=v/t*C,s=`<circle r='40' cx='60' cy='60' fill='none' stroke='${COL[i%6]}' stroke-width='18' stroke-dasharray='${l} ${C-l}' stroke-dashoffset='${-off}' transform='rotate(-90 60 60)'/>`;off+=l;return s}).join('');
+  return `<div style='display:flex;align-items:center;gap:14px'><svg viewBox='0 0 120 120' width='120'>${arcs}</svg><div>${e.map(([k,v],i)=>`<div style='font-size:14px'><span style='color:${COL[i%6]}'>●</span> ${k} ${Math.round(v/t*100)}%</div>`).join('')}</div></div>`;
+}
+function donutSvg(by){
+  const e=Object.entries(by),t=e.reduce((a,[,v])=>a+v,0);
+  if(!t)return `<div class='empty'>Add spending and your mix shows up here.</div>`;
+  const col=k=>{const i=S.cats.indexOf(k);return i<0?'#8A86A8':COL[i%10]};
+  let off=0;const C=2*Math.PI*40;
+  const arcs=e.map(([k,v])=>{const l=v/t*C,s=`<circle r='40' cx='60' cy='60' fill='none' stroke='${col(k)}' stroke-width='18' stroke-dasharray='${l} ${C-l}' stroke-dashoffset='${-off}' transform='rotate(-90 60 60)'/>`;off+=l;return s}).join('');
+  return `<div style='display:flex;align-items:center;gap:14px'><svg viewBox='0 0 120 120' width='120'>${arcs}</svg><div>${e.map(([k,v])=>`<div style='font-size:14px'><span style='color:${col(k)}'>●</span> ${esc(k)} ${Math.round(v/t*100)}%</div>`).join('')}</div></div>`;
+}
+function catManager(){
+  return `<label for='nc'>Your categories</label><div class='chips'>${S.cats.map((c,i)=>`<span class='chip' style='border-color:${COL[i%10]}'>${esc(c)}<button class='x' style='padding:0 0 0 8px' aria-label='Remove ${esc(c)}' onclick='delCat(${i})'>×</button></span>`).join('')}</div><div class='three' style='margin-top:10px'><input id='nc' type='text' maxlength='16' placeholder='Gaming, Gifts, Books…'><button class='btn alt' style='margin-top:0' onclick='addCat()'>Add</button></div>`;
+}
+function addCat(){
+  const n=document.getElementById('nc').value.replace(/['"<>]/g,'').trim();
+  if(!n){toast('Type a category name');return}
+  if(S.cats.some(c=>c.toLowerCase()===n.toLowerCase())){toast('You already have that one');return}
+  if(S.cats.length>=12){toast('Max 12 categories');return}
+  S.cats.push(n);CATS=S.cats;pick=n;save();render();toast('Category added');
+}
+function delCat(i){
+  if(S.cats.length<=1){toast('Keep at least one category');return}
+  S.cats.splice(i,1);CATS=S.cats;if(!CATS.includes(pick))pick=CATS[0];save();render();
+}
+function goalCard(){return `<section class='card'><h2>Saving goal</h2>${goalBlock()}</section>`}
+function postRender(){
+  const x=CTX,app=document.getElementById('app'),lim=x.flex/x.dim;
+  const E={happy:['😄','🎉','💸','✨','🤑'],mid:['😬','😅','🤔','😐','⚠️'],danger:['🚨','😱','🔥','💀','📉']}[x.mood];
+  const msg={happy:'You’re under your limit. Keep it up!',mid:'Spending is picking up. Watch your next few buys.',danger:'Danger zone! Cut back now so the month lasts.'}[x.mood];
+  app.querySelector('.top').insertAdjacentHTML('afterend',`<div class='mood'>${E[0]} ${msg} ${E[1]}${x.day===x.dim?`<br><small>Last day: ${fmt(Math.max(0,x.flex-Object.values(x.dayAmt).reduce((a,b)=>a+b,0)))} moves to savings at 11:59 pm.</small>`:''}</div>`);
+  let dots='';for(let i=Math.max(1,x.day-6);i<=x.day;i++){const ok=(x.dayAmt[dayKey(i)]||0)<=lim;dots+=`<div class='dot'><span>${ok?'😄':'😬'}</span><small>${i}</small></div>`}
+  let cum=0;const act=[[0,0]];for(let i=1;i<=x.day;i++){cum+=x.dayAmt[dayKey(i)]||0;act.push([i,cum])}
+  const ym=Math.max(x.flex,cum,1);
+  const hero=app.querySelector('.hero');
+  if(hero)hero.insertAdjacentHTML('afterend',`<section class='card'><h2>${E[0]} Your streak</h2><div class='big' style='font-size:44px'>${x.streak} days</div><div class='row'><span>Best ever</span><b>${S.best} days</b></div><div class='dots'>${dots}</div></section>
+  <section class='card'><h2>Daily spending</h2>${barSvg(x,lim)}</section>
+  <section class='card'><h2>Money pace</h2>${lineSvg([{p:[[0,0],[x.dim,x.flex]],c:'var(--mute)',d:1},{p:act,c:x.mood==='happy'?'var(--ok)':'var(--bad)'}],x.dim,ym)}<div class='row'><span>Dashed is your ideal pace. Solid is you.</span></div></section>
+  <section class='card'><h2>Spending mix</h2>${donutSvg(x.byCat)}${catManager()}</section>`);
+  const sv=S.savings.log;let run=Math.max(0,S.savings.total-sv.reduce((a,l)=>a+l.amt,0));const sp=[[0,run]];sv.forEach((l,i)=>{run+=l.amt;sp.push([i+1,run])});
+  app.insertAdjacentHTML('beforeend',`<section class='card'><h2>Savings growth</h2>${sv.length?lineSvg([{p:sp,c:'var(--ok)'}],sv.length,Math.max(1,...sp.map(p=>p[1]))):`<div class='empty'>Your savings chart appears after your first move into the pool.</div>`}</section>`);
+  const rc=S.recaps.slice(-6),rm=Math.max(1,...rc.map(r=>Math.max(r.spent,r.saved))),w=300/Math.max(rc.length,1);
+  app.insertAdjacentHTML('beforeend',`<section class='card'><h2>Month by month</h2>${rc.length?`<svg viewBox='0 0 300 110' width='100%'>${rc.map((r,i)=>{const a=r.spent/rm*100,b=r.saved/rm*100;return `<rect x='${i*w+8}' y='${110-a}' width='${w/2-10}' height='${a}' rx='2' style='fill:var(--bad)'/><rect x='${i*w+w/2}' y='${110-b}' width='${w/2-10}' height='${b}' rx='2' style='fill:var(--ok)'/>`}).join('')}</svg><div class='row'><span>Red is spent, green is saved.</span></div>`:`<div class='empty'>Your first recap appears when this month ends. 🎉</div>`}</section>`);
+  app.insertAdjacentHTML('beforeend',aiCard());
+  app.insertAdjacentHTML('beforeend',`<div class='card'><div class='row'><span>Preview mood</span></div><div class='chips'>${['auto','happy','mid','danger'].map(m=>`<button class='chip' aria-pressed='${PREV===m}' onclick="setPrev('${m}')">${m}</button>`).join('')}</div></div>`);
+  const secs=[...app.querySelectorAll('section')],hd=s=>(s.querySelector('h2')||{}).textContent,ms=secs.find(s=>hd(s)==='Month so far'),mxs=secs.find(s=>hd(s)==='Spending mix');if(ms&&mxs)ms.after(mxs);
+  const map={'Monthly plan':'plan','Savings pool':'savings','Savings growth':'savings','Saving goal':'goal','Last month’s recap':'recap','Month by month':'recap','AI money coach':'recap'};
+  [...app.children].forEach(el=>{if(el.classList.contains('top')||el.classList.contains('mood'))return;const h=el.querySelector('h2');el.hidden=((h&&map[h.textContent])||'home')!==TAB});
+  const T=[['home','🏠','Home'],['plan','📋','Plan'],['savings','🐷','Savings'],['goal','🎯','Goal'],['recap','📊','Recap']],nav=document.getElementById('nav');
+  nav.hidden=false;nav.innerHTML=T.map((t,i)=>`<button aria-current='${t[0]===TAB}' onclick="go('${t[0]}')"><span class='ic'>${t[1]}</span>${t[2]}<span class='bd'>${E[i]}</span></button>`).join('');
+  if(FXM!==x.mood){FXM=x.mood;document.getElementById('fx').innerHTML=Array.from({length:24},(_,i)=>`<span style='left:${(i*37+5)%94}%;font-size:${22+i%4*7}px;animation-delay:${-i*0.9}s;animation-duration:${7+i%5*2}s'>${E[i%E.length]}</span>`).join('')}
+}
+function recapCard(){
+  const r=S.recaps[S.recaps.length-1];if(!r)return'';
+  const pct=r.budget?Math.round(r.saved/r.budget*100):0,g=pct>=20?'A':pct>=10?'B':pct>=3?'C':'D';
+  const cs=Object.entries(r.cats||{}).sort((a,b)=>b[1]-a[1]),tot=cs.reduce((a,[,v])=>a+v,0)||1;
+  const R=(a,b,s='')=>`<div class='row'><span>${a}</span><b${s?` style='${s}'`:''}>${b}</b></div>`;
+  return `<section class='card'><h2>Last month’s recap</h2>
+  <div class='big' style='font-size:48px'>${g}</div><div class='row'><span>You kept ${pct}% of your pocket money.</span></div>
+  ${R('Cycle from',r.d)}${R('Pocket money',fmt(r.budget))}${R('🔁 Auto-pay',r.auto!=null?'-'+fmt(r.auto):'-')}${R('One-time plans',r.one!=null?'-'+fmt(r.one):'-')}${R('Everyday spending',fmt(r.spent))}
+  ${r.days?R('Average per day',fmt(r.spent/r.days))+R('Days over your limit',r.over+' of '+r.days)+R('No-spend days',r.ns)+R('Biggest spending day',fmt(r.big)):''}
+  ${R('Best streak',r.streak+' days')}${R('Moved to savings',fmt(r.saved),'color:var(--ok)')}${r.pool!=null?R('Savings pool now',fmt(r.pool)):''}
+  ${r.goal?R('Goal: '+esc(r.goal.name),fmt(Math.min(r.pool||0,r.goal.target))+' of '+fmt(r.goal.target)):''}
+  ${cs.length?`<label>Where it went</label>`+cs.map(([k,v])=>`<div class='cat'><span>${esc(k)}</span><div class='track'><div class='fill' style='width:${v/tot*100}%'></div></div><b>${fmt(v)}</b></div>`).join(''):''}
+  <button class='btn alt' onclick='shareRecap()'>Share recap</button></section>`;
+}
+function aiCard(){
+  const a=S.ai;
+  return `<section class='card'><h2>🤖 AI money coach</h2><div class='row' style='margin-top:0'><span>Reviews your month, finds where to cut, and suggests how to grow your savings.</span></div><div id='aiout' style='white-space:pre-wrap;font-size:15px;margin:10px 0'>${a?esc(a.text):''}</div>${a?`<div class='row'><span>Updated ${new Date(a.t).toLocaleDateString()}</span></div>`:''}<button class='btn' onclick='askCoach()'>${a?'Refresh insights':'Get my insights'}</button><div class='row'><span>General information, not financial advice. Returns are never guaranteed.</span></div></section>`;
+}
+function coachData(){
+  const x=CTX,sp=Object.values(x.dayAmt).reduce((a,b)=>a+b,0),lim=x.flex/x.dim;let over=0;
+  for(let i=1;i<=x.day;i++)if((x.dayAmt[dayKey(i)]||0)>lim)over++;
+  return {currency:S.cur,pocketMoney:S.budget,autoPay:psum(true),oneTimePlans:psum(false),inHandForEveryday:Math.round(x.flex),thisMonth:{daysPassed:x.day,daysInMonth:x.dim,spent:Math.round(sp),byCategory:x.byCat,daysOverLimit:over,currentStreak:x.streak,bestStreak:S.best},savingsPool:Math.round(S.savings.total),goal:S.goal,lastMonths:S.recaps.slice(-3)};
+}
+async function askCoach(){
+  const c=window.claude;
+  if(!c||!c.use){toast('Open the published link to use the AI coach');return}
+  let sample=null;try{sample=await c.use('sample')}catch(e){}
+  if(!sample){toast('AI coach is not available for this link');return}
+  const out=document.getElementById('aiout');out.textContent='Thinking…';
+  const prompt=`You are a friendly, practical money coach for a 19-year-old managing monthly pocket money. Their data as JSON: ${JSON.stringify(coachData())}\n\nWrite under 260 words in plain text with no markdown symbols, using exactly these four headings on their own lines:\nMonth review\nWhere to cut\nSave more\nInvest your savings\n\nMonth review: an honest verdict on whether they went overboard and whether their goal (if any) is at risk, using their numbers.\nWhere to cut: the 2 or 3 categories or plan items to trim, with a specific amount to cut for each.\nSave more: 2 or 3 concrete habits tied to their numbers.\nInvest your savings: based on savingsPool and the currency, suggest suitable beginner options (a savings account or liquid fund for small amounts, a low-cost index fund or ETF through a monthly SIP for larger amounts; India options for ₹, US for $, Europe for €, UK for £). Name the type of fund or index, not a guaranteed stock pick. Mention the risk, say returns are not guaranteed, and say this is general information, not financial advice. If the pool is very small, suggest building an emergency buffer first.\nBe warm, direct and specific.`;
+  try{
+    const r=await sample(prompt,{modelTier:'default',cache:false,onText:({text})=>{out.textContent=text}});
+    S.ai={t:Date.now(),text:r.text};save();render();
+  }catch(e){out.textContent='Couldn’t get insights right now. Try again in a minute.'}
+}
+setInterval(()=>{try{if(S.budget&&S.cycle&&S.cycle!==cyc().key)render()}catch(e){}},30000);
+function psum(r){return S.plans.filter(p=>(p.rec!==false)===r).reduce((a,p)=>a+p.amt,0)}
+function keep(fn){const ids=['pn','pa','pt','pd'],v=ids.map(i=>{const e=document.getElementById(i);return e?e.value:null});fn();render();ids.forEach((i,k)=>{const e=document.getElementById(i);if(e&&v[k]!==null&&v[k]!=='')e.value=v[k]})}
+function setPT(g){keep(()=>{ptype=g;PREC=g==='Subscriptions'})}
+function togRec(){keep(()=>{PREC=!PREC})}
+function addPT(){
+  const n=document.getElementById('nt').value.replace(/['"<>]/g,'').trim();
+  if(!n){toast('Type a name for the new type');return}
+  if(S.ptypes.some(t=>t.toLowerCase()===n.toLowerCase())){toast('You already have that type');return}
+  if(S.ptypes.length>=14){toast('Max 14 types');return}
+  S.ptypes.push(n);ptype=n;PREC=false;save();render();toast('Type added');
+}
+function autoPay(c){
+  let ch=false;const t=new Date();t.setHours(0,0,0,0);
+  S.plans.forEach(p=>{
+    if(p.rec===false||p.ap===c.key)return;
+    const d=p.day||S.startDay,when=new Date(c.s.getFullYear(),c.s.getMonth()+(d<S.startDay?1:0),d);
+    if(t>=when){p.paid=true;p.ap=c.key;ch=true}
+  });
+  if(ch)save();
+}
+function addPlan(){
+  const n=document.getElementById("pn").value.trim(),a=parseFloat(document.getElementById("pa").value),k=Math.max(1,parseInt(document.getElementById("pt").value)||1);
+  if(!n||!(a>0)){toast("Add a name and an amount");return}
+  const dv=document.getElementById('pd'),day=PREC?Math.min(31,Math.max(1,parseInt(dv&&dv.value)||S.startDay)):0;S.plans.push({id:Date.now(),type:ptype,name:k>1?n+" ×"+k:n,amt:a*k,rec:PREC,day:day});
+  save();render();toast("Added to plan");
+}
+function delPlan(id){S.plans=S.plans.filter(p=>p.id!==id);save();render()}
+
+function setupView(){
+  return `<div class="setup">
+    <div class="logo" style="margin-bottom:26px">Lasts</div>
+    <h1>Make your pocket money last all month.</h1>
+    <p>Tell us what you get each month. We’ll show how much is safe to spend every single day.</p>
+    <div class="card">
+      <div class="two">
+        <div><label for="cur">Currency</label><select id="cur">${["₹","$","€","£"].map(c=>`<option ${c===S.cur?"selected":""}>${c}</option>`).join("")}</select></div>
+        <div><label for="bud">Monthly amount</label><input id="bud" class="amt" type="number" inputmode="decimal" min="1" placeholder="5000"></div>
+      </div>
+      <label for="sd">Money arrives on day (1 to 28)</label><input id="sd" type="number" min="1" max="28" value="${S.startDay||1}">
+      <button class="btn" onclick="saveBudget()">Start tracking</button>
+    </div>
+  </div>`;
+}
+
+function saveBudget(){
+  const v=parseFloat(document.getElementById("bud").value);
+  if(!(v>0)){toast("Enter an amount above 0");return}
+  S.budget=v;S.cur=document.getElementById("cur").value;S.startDay=Math.min(28,Math.max(1,parseInt(document.getElementById("sd").value)||1));S.cycle=cyc().key;save();render();
+}
+function editBudget(){S.budget=0;render()}
+function setCat(c){pick=c;const a=document.getElementById("amt").value,n=document.getElementById("note").value;render();document.getElementById("amt").value=a;document.getElementById("note").value=n}
+function addExp(){
+  const v=parseFloat(document.getElementById("amt").value);
+  if(!(v>0)){toast("Enter an amount above 0");return}
+  S.expenses.push({id:Date.now(),amt:v,cat:pick,note:document.getElementById("note").value.trim(),date:dk()});
+  save();render();toast("Added");
+}
+function del(id){S.expenses=S.expenses.filter(e=>e.id!==id);save();render()}
+function resetMonth(){if(confirm("Clear all spending for this month?")){S.expenses=[];save();render()}}
+render();
+</script>
+</body>
+</html>
